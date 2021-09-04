@@ -1,4 +1,5 @@
 import express from "express";
+import { response } from "express";
 import { v4 as  uuidv4 } from 'uuid'
 
 const app = express();
@@ -102,4 +103,42 @@ app.post("/withdraw", verifyExistAccountCPF, (request, response)=>{
 
   return response.status(201).send();
 })
+
+app.get('/statements/date', verifyExistAccountCPF, (request, response) => {
+  const { customer } = request;
+  const { date } = request.query;
+
+  const dateFormat = new Date(date + " 00:00");
+
+
+  const statements = customer.statement.filter((statement)=> statement.created_at.toDateString() === new Date(dateFormat).toDateString())
+  return response.json(statements);
+});
+
+app.put("/accounts",verifyExistAccountCPF,(request, response) =>{
+  const { name } = request.body; 
+  const { customer } = request; 
+  customer.name = name;
+  return response.status(201).send();
+} )
+
+app.get('/account', verifyExistAccountCPF, (request, reponse) => {
+  const { customer } = request;
+  return reponse.json(customer);
+});
+
+
+app.delete('/account', verifyExistAccountCPF, (request, reponse)=>{
+  const { customer } = request;
+  //splice
+  customers.splice(customer, 1);
+  return response.status(200).json(customers)
+});
+
+
+app.get("/balance", verifyExistAccountCPF, (request, response)=>{
+  const { customer } = request;
+  const balance = getBalance(customer.statement);
+  return response.json(balance);
+});
 app.listen(3333);
